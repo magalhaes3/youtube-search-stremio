@@ -1,0 +1,14 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "Better Youtube for Stremio",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"remoteUser": "node",
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {
+			"ppa": true,
+			"version": "latest"
+		}
+	}
+}
