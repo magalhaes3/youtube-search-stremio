@@ -10,13 +10,18 @@ const youtube = google.youtube({
 const manifest = {
 	"id": "community.betteryoutube",
 	"version": "0.0.1",
-	// "catalogs": [
-	// 	{
-	// 		"type": "channel",
-	// 		"id": "better_youtube_videos"
-	// 	}
-	// ],
-	"catalogs": [],
+	"catalogs": [
+		{
+			"type": "channel",
+			"id": "better_youtube_videos",
+			"extra": [
+				{
+					"name": "search",
+					"isRequired": false
+				}
+			]
+		}
+	],
 	"resources": [
 		"catalog",
 		"stream",
@@ -30,19 +35,35 @@ const manifest = {
 }
 const builder = new addonBuilder(manifest)
 
-builder.defineCatalogHandler(({ type, id, extra }) => {
+builder.defineCatalogHandler(async ({ type, id, extra }) => {
 	console.log("request for catalogs: " + type + " " + id)
+	console.log(extra)
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineCatalogHandler.md
-	return Promise.resolve({
-		metas: [
-			{
-				id: "tt1254207",
-				type: "movie",
-				name: "The Big Buck Bunny",
-				poster: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/220px-Big_buck_bunny_poster_big.jpg"
-			}
-		]
-	})
+	if (type == 'channel') {
+		// Get search query
+		const search_query = extra.search
+		// Get channels
+		const res = await youtube.search.list({
+			part: 'snippet',
+			q: search_query,
+			type: 'channel',
+			maxResults: 20
+		})
+		const channels = res.data.items
+		const metas = []
+		for (let i = 0; i < channels.length; i++) {
+			const channel = channels[i]
+			metas.push({
+				id: 'yt:' + channel.id.channelId,
+				type: 'channel',
+				name: channel.snippet.title,
+				poster: channel.snippet.thumbnails.high.url
+			})
+		}
+		return Promise.resolve({ metas: metas })
+	} else {
+		return Promise.resolve({ meta: {} })
+	}
 })
 
 builder.defineMetaHandler(async ({ type, id }) => {
