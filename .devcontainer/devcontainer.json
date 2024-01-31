@@ -10,5 +10,8 @@
 			"ppa": true,
 			"version": "latest"
 		}
-	}
+	},
+	"mounts": [
+		"source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
+	]
 }
