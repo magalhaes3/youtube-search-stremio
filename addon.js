@@ -12,30 +12,15 @@ const builder = new addonBuilder(manifest)
 
 builder.defineCatalogHandler(async ({ type, id, extra }) => {
 	console.log("request for catalogs: " + type + " " + id)
-	console.log(extra)
+	// Get search query
+	const searchQuery = extra.search
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineCatalogHandler.md
 	if (type == 'channel') {
-		// Get search query
-		const search_query = extra.search
-		// Get channels
-		const res = await youtube.search.list({
-			part: 'snippet',
-			q: search_query,
-			type: 'channel',
-			maxResults: 20
-		})
-		const channels = res.data.items
-		const metas = []
-		for (let i = 0; i < channels.length; i++) {
-			const channel = channels[i]
-			metas.push({
-				id: 'yt:' + channel.id.channelId,
-				type: 'channel',
-				name: channel.snippet.title,
-				poster: channel.snippet.thumbnails.high.url
-			})
-		}
-		return Promise.resolve({ metas: metas })
+		channelMetas = await channelSearch(searchQuery)
+		return Promise.resolve({ metas: channelMetas })
+	} else if (type == 'movie') {
+		videoMetas = await videoSearch(searchQuery)
+		return Promise.resolve({ metas: videoMetas })
 	} else {
 		return Promise.resolve({ meta: {} })
 	}
@@ -61,10 +46,10 @@ builder.defineMetaHandler(async ({ type, id }) => {
 			name: res.data.items[0].snippet.title,
 			description: res.data.items[0].snippet.description,
 			country: res.data.items[0].snippet.country,
-			// posterShape: 'square',
-			// poster: res.data.items[0].snippet.thumbnails.default.url,
-			// background: res.data.items[0].snippet.thumbnails.high.url,
-			// logo: res.data.items[0].snippet.thumbnails.medium.url,
+			posterShape: 'square',
+			poster: res.data.items[0].snippet.thumbnails.default.url,
+			background: res.data.items[0].snippet.thumbnails.high.url,
+			logo: res.data.items[0].snippet.thumbnails.medium.url,
 		}
 		// Get channel videos
 		const video_ids = res.data.items[0].contentDetails.relatedPlaylists.uploads
@@ -87,7 +72,6 @@ builder.defineMetaHandler(async ({ type, id }) => {
 				]
 			})
 		}
-		console.log(video_metas)
 		meta.videos = video_metas
 
 		return Promise.resolve({ meta: meta })
@@ -103,5 +87,52 @@ builder.defineStreamHandler(({ type, id }) => {
 	// return no streams
 	return Promise.resolve({ streams: [] })
 })
+
+// Create function to handle search requests
+async function channelSearch(searchQuery) {
+	console.log("searching for channels: " + searchQuery)
+	// Get channels
+	const res = await youtube.search.list({
+		part: 'snippet',
+		q: searchQuery,
+		type: 'channel',
+		maxResults: 20
+	})
+	const channels = res.data.items
+	const metas = []
+	for (let i = 0; i < channels.length; i++) {
+		const channel = channels[i]
+		metas.push({
+			id: 'yt:' + channel.id.channelId,
+			type: 'channel',
+			name: channel.snippet.title,
+			poster: channel.snippet.thumbnails.high.url
+		})
+	}
+	return metas
+}
+
+async function videoSearch(searchQuery) {
+	console.log("searching for videos: " + searchQuery)
+	// Get videos
+	const res = await youtube.search.list({
+		part: 'snippet',
+		q: searchQuery,
+		type: 'video',
+		maxResults: 20
+	})
+	const videos = res.data.items
+	const metas = []
+	for (let i = 0; i < videos.length; i++) {
+		const video = videos[i]
+		metas.push({
+			id: 'yt:' + video.id.videoId,
+			type: 'video',
+			name: video.snippet.title,
+			poster: video.snippet.thumbnails.high.url
+		})
+	}
+	return metas
+}
 
 module.exports = builder.getInterface()

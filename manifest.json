@@ -4,7 +4,17 @@
     "catalogs": [
         {
             "type": "channel",
-            "id": "better_youtube_videos",
+            "id": "channels",
+            "extra": [
+                {
+                    "name": "search",
+                    "isRequired": true
+                }
+            ]
+        },
+        {
+            "type": "movie",
+            "id": "videos",
             "extra": [
                 {
                     "name": "search",
