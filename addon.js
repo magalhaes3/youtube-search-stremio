@@ -100,8 +100,7 @@ async function channelSearch(searchQuery) {
 	})
 	const channels = res.data.items
 	const metas = []
-	for (let i = 0; i < channels.length; i++) {
-		const channel = channels[i]
+	for (let channel of channels) {
 		metas.push({
 			id: 'yt:' + channel.id.channelId,
 			type: 'channel',
@@ -123,8 +122,7 @@ async function videoSearch(searchQuery) {
 	})
 	const videos = res.data.items
 	const metas = []
-	for (let i = 0; i < videos.length; i++) {
-		const video = videos[i]
+	for (let video of videos) {
 		metas.push({
 			id: 'yt:' + video.id.videoId,
 			type: 'video',
