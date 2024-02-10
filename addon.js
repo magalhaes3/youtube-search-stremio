@@ -7,32 +7,7 @@ const youtube = google.youtube({
 })
 
 // Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/responses/manifest.md
-const manifest = {
-	"id": "community.betteryoutube",
-	"version": "0.0.1",
-	"catalogs": [
-		{
-			"type": "channel",
-			"id": "better_youtube_videos",
-			"extra": [
-				{
-					"name": "search",
-					"isRequired": false
-				}
-			]
-		}
-	],
-	"resources": [
-		"catalog",
-		"stream",
-		"meta"
-	],
-	"types": [
-		"channel"
-	],
-	"name": "better-youtube",
-	"description": "Youtube for Stremio that actually works."
-}
+const manifest = require('./manifest.json')
 const builder = new addonBuilder(manifest)
 
 builder.defineCatalogHandler(async ({ type, id, extra }) => {

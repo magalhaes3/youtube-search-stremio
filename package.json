@@ -3,10 +3,13 @@
 	"version": "0.0.1",
 	"description": "Youtube for Stremio that actually works.",
 	"scripts": {
-		"start": "node server.js"
+		"start": "nodemon server.js"
 	},
 	"dependencies": {
 		"googleapis": "^128.0.0",
 		"stremio-addon-sdk": "1.1.x"
+	},
+	"devDependencies": {
+		"nodemon": "^3.0.3"
 	}
 }

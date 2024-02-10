@@ -1,0 +1,26 @@
+{
+    "id": "community.betteryoutube",
+    "version": "0.0.1",
+    "catalogs": [
+        {
+            "type": "channel",
+            "id": "better_youtube_videos",
+            "extra": [
+                {
+                    "name": "search",
+                    "isRequired": true
+                }
+            ]
+        }
+    ],
+    "resources": [
+        "catalog",
+        "stream",
+        "meta"
+    ],
+    "types": [
+        "channel"
+    ],
+    "name": "better-youtube",
+    "description": "Youtube for Stremio that actually works."
+}
