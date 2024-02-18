@@ -25,5 +25,17 @@
     ],
     "name": "youtube-search",
     "description": "Stremio plugin to search for videos and channels on Youtube.",
-    "logo": "https://cdn-icons-png.flaticon.com/512/10095/10095815.png"
+    "logo": "https://cdn-icons-png.flaticon.com/512/10095/10095815.png",
+    "behaviorHints": {
+        "configurable": true,
+        "configurationRequired": true
+    },
+    "config": [
+        {
+            "key": "yt_api_key",
+            "type": "password",
+            "title": "Youtube API Key",
+            "required": true
+        }
+    ]
 }

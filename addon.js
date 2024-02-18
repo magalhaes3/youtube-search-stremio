@@ -1,30 +1,29 @@
 const { addonBuilder } = require("stremio-addon-sdk")
 const { google } = require('googleapis')
-const youtube_api_key = process.env.YOUTUBE_API_KEY
-const youtube = google.youtube({
-	version: 'v3',
-	auth: youtube_api_key
-})
 
 // Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/responses/manifest.md
 const manifest = require('./manifest.json')
 const builder = new addonBuilder(manifest)
 
-builder.defineCatalogHandler(async ({ type, id, extra }) => {
+builder.defineCatalogHandler(async ({ type, id, extra, config }) => {
 	console.log("request for catalogs: " + type + " " + id)
 	// Get search query
 	const searchQuery = extra.search
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineCatalogHandler.md
 	if (type == 'yt_search' && id == 'yt_search') {
-		ytSearchResultMetas = await youtubeSearch(searchQuery)
+		ytSearchResultMetas = await youtubeSearch(searchQuery, config.yt_api_key)
 		return Promise.resolve({ metas: ytSearchResultMetas })
 	} else {
 		return Promise.resolve({ meta: {} })
 	}
 })
 
-builder.defineMetaHandler(async ({ type, id }) => {
+builder.defineMetaHandler(async ({ type, id, config }) => {
 	console.log("request for meta: " + type + " " + id)
+	const youtube = google.youtube({
+		version: 'v3',
+		auth: config.yt_api_key
+	})
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineMetaHandler.md
 	if (type == 'channel') {
 		// get channel id by splitting id by :
@@ -74,7 +73,6 @@ builder.defineMetaHandler(async ({ type, id }) => {
 		return Promise.resolve({ meta: meta })
 
 	} else if (type == 'yt_video') {
-		console.log('RETURN VIDEO INFOOOOO')
 		// Get video info
 		let videoResult = await youtube.videos.list({
 			part: 'snippet,contentDetails',
@@ -109,8 +107,12 @@ builder.defineStreamHandler(({ type, id }) => {
 })
 
 // Create function to handle search requests
-async function youtubeSearch(searchQuery) {
+async function youtubeSearch(searchQuery, apiKey) {
 	console.log("Searching for : " + searchQuery)
+	const youtube = google.youtube({
+		version: 'v3',
+		auth: apiKey
+	})
 	let searchResult = await youtube.search.list({
 		part: 'snippet',
 		q: searchQuery,
