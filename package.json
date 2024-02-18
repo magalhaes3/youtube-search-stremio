@@ -3,7 +3,8 @@
 	"version": "0.0.1",
 	"description": "Youtube for Stremio that actually works.",
 	"scripts": {
-		"start": "nodemon server.js"
+		"start": "node server.js",
+		"start-dev": "nodemon server.js"
 	},
 	"dependencies": {
 		"googleapis": "^128.0.0",
