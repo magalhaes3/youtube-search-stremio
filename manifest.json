@@ -1,20 +1,10 @@
 {
-    "id": "community.betteryoutube",
+    "id": "community.youtubesearch",
     "version": "0.0.1",
     "catalogs": [
         {
-            "type": "channel",
-            "id": "channels",
-            "extra": [
-                {
-                    "name": "search",
-                    "isRequired": true
-                }
-            ]
-        },
-        {
-            "type": "movie",
-            "id": "videos",
+            "type": "yt_search",
+            "id": "yt_search",
             "extra": [
                 {
                     "name": "search",
@@ -29,8 +19,11 @@
         "meta"
     ],
     "types": [
-        "channel"
+        "channel",
+        "yt_search",
+        "yt_video"
     ],
-    "name": "better-youtube",
-    "description": "Youtube for Stremio that actually works."
+    "name": "youtube-search",
+    "description": "Stremio plugin to search for videos and channels on Youtube.",
+    "logo": "https://cdn-icons-png.flaticon.com/512/10095/10095815.png"
 }

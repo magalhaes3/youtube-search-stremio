@@ -15,12 +15,9 @@ builder.defineCatalogHandler(async ({ type, id, extra }) => {
 	// Get search query
 	const searchQuery = extra.search
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineCatalogHandler.md
-	if (type == 'channel') {
-		channelMetas = await channelSearch(searchQuery)
-		return Promise.resolve({ metas: channelMetas })
-	} else if (type == 'movie') {
-		videoMetas = await videoSearch(searchQuery)
-		return Promise.resolve({ metas: videoMetas })
+	if (type == 'yt_search' && id == 'yt_search') {
+		ytSearchResultMetas = await youtubeSearch(searchQuery)
+		return Promise.resolve({ metas: ytSearchResultMetas })
 	} else {
 		return Promise.resolve({ meta: {} })
 	}
@@ -76,6 +73,26 @@ builder.defineMetaHandler(async ({ type, id }) => {
 
 		return Promise.resolve({ meta: meta })
 
+	} else if (type == 'yt_video') {
+		console.log('RETURN VIDEO INFOOOOO')
+		// Get video info
+		let videoResult = await youtube.videos.list({
+			part: 'snippet,contentDetails',
+			id: id.split(':')[1]
+		})
+		videoResult = videoResult.data.items[0]
+		videoMeta = {
+			id: id,
+			type: 'yt_video',
+			name: videoResult.snippet.title,
+			poster: videoResult.snippet.thumbnails.default.url,
+			posterShape: 'landscape',
+			background: videoResult.snippet.thumbnails.high.url,
+			description: videoResult.snippet.description,
+			released: videoResult.snippet.publishedAt,
+			language: videoResult.snippet.defaultAudioLanguage
+		}
+		return Promise.resolve({ meta: videoMeta })
 	} else {
 		return Promise.resolve({ meta: {} })
 	}
@@ -85,50 +102,42 @@ builder.defineStreamHandler(({ type, id }) => {
 	console.log("request for streams: " + type + " " + id)
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineStreamHandler.md
 	// return no streams
+	if (type == 'yt_video') {
+		return Promise.resolve({ streams: [{ ytId: id.split(':')[1] }] })
+	}
 	return Promise.resolve({ streams: [] })
 })
 
 // Create function to handle search requests
-async function channelSearch(searchQuery) {
-	console.log("searching for channels: " + searchQuery)
-	// Get channels
-	const res = await youtube.search.list({
+async function youtubeSearch(searchQuery) {
+	console.log("Searching for : " + searchQuery)
+	let searchResult = await youtube.search.list({
 		part: 'snippet',
 		q: searchQuery,
-		type: 'channel',
-		maxResults: 20
+		type: 'channel,video',
+		maxResults: 25
 	})
-	const channels = res.data.items
+	searchResult = searchResult.data.items
 	const metas = []
-	for (let channel of channels) {
-		metas.push({
-			id: 'yt:' + channel.id.channelId,
-			type: 'channel',
-			name: channel.snippet.title,
-			poster: channel.snippet.thumbnails.high.url
-		})
-	}
-	return metas
-}
+	for (let result of searchResult) {
+		if (result.id.kind == 'youtube#channel') {
+			metas.push({
+				id: 'yt:' + result.id.channelId,
+				type: 'channel',
+				name: result.snippet.title,
+				poster: result.snippet.thumbnails.high.url
+			})
+		} else if (result.id.kind == 'youtube#video') {
+			metas.push({
+				id: 'yt:' + result.id.videoId,
+				type: 'yt_video',
+				name: result.snippet.title,
+				poster: result.snippet.thumbnails.high.url,
+				posterShape: 'landscape',
+				description: result.snippet.description
+			})
+		}
 
-async function videoSearch(searchQuery) {
-	console.log("searching for videos: " + searchQuery)
-	// Get videos
-	const res = await youtube.search.list({
-		part: 'snippet',
-		q: searchQuery,
-		type: 'video',
-		maxResults: 20
-	})
-	const videos = res.data.items
-	const metas = []
-	for (let video of videos) {
-		metas.push({
-			id: 'yt:' + video.id.videoId,
-			type: 'video',
-			name: video.snippet.title,
-			poster: video.snippet.thumbnails.high.url
-		})
 	}
 	return metas
 }
