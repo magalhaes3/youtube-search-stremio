@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"googleapis": "^128.0.0",
-		"stremio-addon-sdk": "1.1.x"
+		"stremio-addon-sdk": "1.6.x"
 	},
 	"devDependencies": {
 		"nodemon": "^3.0.3"
